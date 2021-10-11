@@ -1,4 +1,17 @@
 /** @type {import('next').NextConfig} */
 module.exports = {
-  reactStrictMode: true,
+    reactStrictMode: true,
+
+    env: {
+        APP_NAME: "Bansos Ku"
+    },
+
+    async rewrites() {
+        return [
+            {
+                source: '/verifikasi',
+                destination: '/verification',
+            }
+        ]
+    },
 }

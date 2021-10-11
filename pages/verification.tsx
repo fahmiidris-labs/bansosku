@@ -3,9 +3,9 @@ import { getAppLayout } from "@/components/AppLayout"
 
 import { NextPageWithLayout } from "@/types/app.type"
 
-const Home: NextPageWithLayout = () => {
+const Verification: NextPageWithLayout = () => {
     return (
-        <Main title="Home" className="container">
+        <Main title="Verifikasi" className="container">
             <div>
                 
             </div>
@@ -13,6 +13,6 @@ const Home: NextPageWithLayout = () => {
     )
 }
 
-Home.getLayout = getAppLayout
+Verification.getLayout = getAppLayout
 
-export default Home
+export default Verification
