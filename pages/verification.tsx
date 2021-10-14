@@ -185,6 +185,7 @@ const Verification: NextPageWithLayout = () => {
                                                         {...field}
                                                         id="reason-select"
                                                         instanceId="reason-select"
+                                                        className="mt-1"
                                                         styles={{
                                                             control: (base) => ({
                                                                 ...base,
