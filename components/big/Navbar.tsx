@@ -1,38 +1,42 @@
 import { Fragment } from "react"
 import { useRouter } from "next/router"
 import Link from "next/link"
-
-import { Disclosure } from "@headlessui/react"
-import { MenuIcon, XIcon } from "@heroicons/react/outline"
+import { HomeIcon, ClipboardListIcon } from "@heroicons/react/outline"
 
 import ApplicationMark from "../small/ApplicationMark"
-import ApplicationLogo from "../small/ApplicationLogo"
 
-import { NavbarLinkType, LinksType } from "@/types/navbar.type"
+import { NavbarLinkType, LinksType, NavbarType } from "@/types/navbar.type"
+
+const links: LinksType[] = [
+    {
+        text: "Home",
+        url: "/",
+        icon: <HomeIcon className="w-5 h-5" />
+    }, {
+        text: "Form Verifikasi",
+        url: "/verification",
+        icon: <ClipboardListIcon className="w-5 h-5 animate-wiggle" />
+    }
+]
 
 const Navbar: React.FC = () => {
 
-    const links: LinksType[] = [
-        {
-            text: "Home",
-            url: "/",
-        }, {
-            text: "Form Verifikasi",
-            url: "/verification",
-        }
-    ]
 
     return (
-        <nav className="bg-white/95 border-b border-gray-100">
+        <Fragment>
+            <DesktopNavbar />
+            <MobileNavbar className="block sm:hidden" />
+        </Fragment>
+    )
+}
+
+const DesktopNavbar: React.FC<NavbarType> = ({ className }) => {
+    return (
+        <nav className={`${className} bg-white/95 border-b border-gray-100 fixed top-0 inset-x-0 z-10`}>
             <div className="container">
-                <div className="relative flex items-center justify-center sm:justify-between h-16">
-
-                    <div className="absolute inset-y-0 left-0 flex items-center sm:hidden">
-                        {/*  */}
-                    </div>
-
+                <div className="relative flex items-center justify-between h-16">
                     {/* Left Menu Navigation */}
-                    <div className="flex items-center justify-center sm:items-stretch sm:justify-start">
+                    <div className="flex items-stretch justify-start">
                         {/* Logo Paperless */}
                         <Link href="/">
                             <a className="flex-shrink-0 flex items-center">
@@ -42,9 +46,9 @@ const Navbar: React.FC = () => {
                     </div>
 
                     {/* Right Menu Navigation */}
-                    <div className="hidden sm:flex items-center justify-end">
+                    <div className="hidden md:flex items-center justify-end">
                         {/* Main Menu Navigration */}
-                        <div className="hidden sm:block">
+                        <div className="block">
                             <div className="flex space-x-1">
                                 {links.map((link, index) => (
                                     <NavbarLink key={index} href={link.url}>
@@ -54,9 +58,23 @@ const Navbar: React.FC = () => {
                             </div>
                         </div>
                     </div>
+                </div>
+            </div>
+        </nav>
+    )
+}
 
-                    <div className="absolute inset-y-0 right-0 flex items-center space-x-1 sm:hidden">
-                        {/*  */}
+const MobileNavbar: React.FC<NavbarType> = ({ className }) => {
+    return (
+        <nav className={`${className} fixed bottom-0 inset-x-0 bg-white/95 border-t-2 border-gray-100`}>
+            <div className="container">
+                <div className="relative flex items-center justify-center h-16">
+                    <div className="grid grid-cols-2 gap-4">
+                        {links.map((link, index) => (
+                            <MobileNavbarLink key={index} href={link.url} icon={link.icon}>
+                                {link.text}
+                            </MobileNavbarLink>
+                        ))}
                     </div>
                 </div>
             </div>
@@ -75,6 +93,22 @@ const NavbarLink: React.FC<NavbarLinkType> = ({ href, children, ...props }) => {
                 {asPath === href && (
                     <span className="absolute bottom-0 h-1 bg-green w-full rounded-t-md"></span>
                 )}
+            </a>
+        </Link>
+    )
+}
+
+const MobileNavbarLink: React.FC<NavbarLinkType & { icon?: React.ReactElement }> = ({ href, icon, children, ...props }) => {
+
+    const { asPath } = useRouter()
+
+    return (
+        <Link href={href}>
+            <a className={`relative inline-flex justify-center font-lato items-center ${asPath === href ? "bg-green text-white" : "text-gray-700"} px-3 py-2 rounded-lg text-sm duration-100 ease-in-out`} {...props}>
+                <div className="flex items-center space-x-2">
+                    <div>{icon}</div>
+                    <div>{children}</div>
+                </div>
             </a>
         </Link>
     )
