@@ -66,7 +66,7 @@ const DesktopNavbar: React.FC<NavbarType> = ({ className }) => {
 
 const MobileNavbar: React.FC<NavbarType> = ({ className }) => {
     return (
-        <nav className={`${className} fixed bottom-0 inset-x-0 bg-white/95 border-t-2 border-gray-100`}>
+        <nav className={`${className} fixed bottom-0 inset-x-0 z-10 bg-white/95 border-t-2 border-gray-100`}>
             <div className="container">
                 <div className="relative flex items-center justify-center h-16">
                     <div className="grid grid-cols-2 gap-4">
