@@ -3,6 +3,7 @@ import "nprogress/nprogress.css"
 
 import NProgress from "nprogress"
 import Router from "next/router"
+import { Toaster } from "react-hot-toast"
 
 import { AppPropsWithLayout } from "@/types/app.type"
 import AppLayout from "@/components/AppLayout"
@@ -17,12 +18,18 @@ const MyApp = ({ Component, pageProps, router }: AppPropsWithLayout) => {
 
     const getLayout = Component.getLayout || ((page) => {
         return (
-            <AppLayout>{page}</AppLayout>
+            <>
+                <Toaster />
+                <AppLayout>{page}</AppLayout>
+            </>
         )
     })
 
     return getLayout(
-        <Component {...pageProps} />
+        <>
+            <Toaster />
+            <Component {...pageProps} />
+        </>
     )
 }
 

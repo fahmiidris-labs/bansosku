@@ -1,6 +1,8 @@
-import { SubmitHandler, useForm } from "react-hook-form"
+import { useState } from "react"
+import { Controller, SubmitHandler, useForm } from "react-hook-form"
 import { yupResolver } from "@hookform/resolvers/yup"
-import * as yup from "yup"
+import CreatableSelect from "react-select/creatable"
+import toast from "react-hot-toast"
 
 import Main from "@/components/Main"
 import { getAppLayout } from "@/components/AppLayout"
@@ -8,42 +10,77 @@ import Label from "@/components/small/Label"
 
 import { NextPageWithLayout } from "@/types/app.type"
 import { VerificationType } from "@/types/verification.type"
+import { schema } from "@/validations/verification"
 
-const schema = yup.object({
-    name: yup.string().required("Nama tidak boleh kosong"),
-    nik: yup.number()
-        .typeError("Nomor NIK tidak boleh kosong")
-        .required("Nomor NIK tidak boleh kosong")
-        .test("len", "Nomor NIK harus 16 digit", val => val?.toString().length === 16),
-    kk: yup.number()
-        .typeError("Nomor KK tidak boleh kosong")
-        .required("Nomor KK tidak boleh kosong")
-        .test("len", "Nomor KK harus 16 digit", val => val?.toString().length === 16),
-    age: yup.number()
-        .typeError("Umur tidak boleh kosong")
-        .required("Umur tidak boleh kosong")
-        .min(25, "Minimal umur 25 tahun"),
-    gender: yup.string().required("Wajib memilih jenis kelamin"),
-    address: yup.string()
-        .required("Nomor RT tidak boleh kosong")
-        .max(255, "Tidak lebih dari 255 karakter"),
-    rt: yup.string().required("Nomor RT tidak boleh kosong"),
-    rw: yup.string().required("Nomor RW tidak boleh kosong"),
-    income_before: yup.number()
-        .typeError("Pendapatan sebelum pandemi tidak boleh kosong")
-        .required("Pendapatan sebelum pandemi tidak boleh kosong"),
-    income_after: yup.number()
-        .typeError("Pendapatan setelah pandemi tidak boleh kosong")
-        .required("Pendapatan setelah pandemi tidak boleh kosong"),
-}).required()
+
 
 const Verification: NextPageWithLayout = () => {
 
-    const { register, handleSubmit, formState: { errors } } = useForm<VerificationType>({
-        resolver: yupResolver(schema)
+    const initial: VerificationType = {
+        name: "",
+        nik: "",
+        kk: "",
+        age: "",
+        gender: "",
+        address: "",
+        rt: "",
+        rw: "",
+        income_before: "",
+        income_after: "",
+        reason: {
+            label: "",
+            value: "",
+        } ,
+        img_ktp: null,
+        img_kk: null,
+        agreement: false
+    }
+
+    const [loading, setLoading] = useState<boolean>(false)
+    const { register, handleSubmit, control, reset, formState: { errors } } = useForm<VerificationType>({
+        resolver: yupResolver(schema),
+        defaultValues: initial
     })
 
-    const onSubmitHandle: SubmitHandler<VerificationType> = data => console.log(data)
+    const options = [
+        { value: 'Kehilangan pekerjaan', label: 'Kehilangan pekerjaan' },
+        { value: 'Kepala keluarga terdampak atau korban Covid', label: 'Kepala keluarga terdampak atau korban Covid' },
+        { value: 'Tergolong fakir/miskin semenjak sebelum Covid', label: 'Tergolong fakir/miskin semenjak sebelum Covid' },
+    ]
+
+    const onSubmitHandle: SubmitHandler<VerificationType> = data => {
+        const normal: number = 1500
+        // Dibuat besar kemungkinan error untuk simulasi
+        const time: number = 1000 * (Math.random() + 1)
+
+        setLoading(true)
+        setTimeout(() => {
+            if (time > normal) {
+                toast.error('Ups! Sepertinya ada masalah dengan server, tolong klik verifikasi kembali.', {
+                    style: {
+                        background: '#333',
+                        color: '#fff',
+                    }
+                })
+                console.log(time)
+                console.log("Data error karena lebih dari 1500 millisecond")
+                setLoading(false)
+            } else {
+                toast.success('Sukses! Data sudah berhasil disimpan.', {
+                    style: {
+                        background: '#333',
+                        color: '#fff',
+                    }
+                })
+                // Form tidak di reset untuk memudahkan saat test.
+                // reset(initial)
+                console.log(time)
+                console.log(data)
+                setLoading(false)
+            }
+        }, time)
+
+    }
 
     return (
         <Main title="Verifikasi" className="container">
@@ -136,11 +173,70 @@ const Verification: NextPageWithLayout = () => {
                                                 <small className="text-red-500">{errors.income_after.message}</small>
                                             )}
                                         </div>
+                                        <div className="col-span-6 sm:col-span-6">
+                                            <Label htmlFor="reason" value="Alasan Membutuhkan Bantuan" />
+                                            <Controller
+                                                name="reason"
+                                                control={control}
+                                                rules={{ required: true }}
+                                                render={({ field }) => (
+                                                    <CreatableSelect
+                                                        isClearable
+                                                        {...field}
+                                                        id="reason-select"
+                                                        instanceId="reason-select"
+                                                        styles={{
+                                                            control: (base) => ({
+                                                                ...base,
+                                                                "[type='text']:focus": {
+                                                                    boxShadow: "none"
+                                                                }
+                                                            })
+                                                        }}
+                                                        placeholder="Ketikan alasan nya disini, atau pilih pilihan di bawah ini"
+                                                        options={options}
+                                                    />
+                                                )}
+                                            />
+                                            {errors.reason && (
+                                                <small className="text-red-500">{errors.reason.value?.message}</small>
+                                            )}
+                                        </div>
+                                        <div className="col-span-6 sm:col-span-3">
+                                            <Label htmlFor="img_ktp" value="Foto KTP" />
+                                            <input type="file" {...register("img_ktp")} className="pt-1 w-full focus:outline-none" />
+                                            {errors.img_ktp && errors.img_ktp.message && (
+                                                <small className="text-red-500">{errors.img_ktp.message}</small>
+                                            )}
+                                        </div>
+                                        <div className="col-span-6 sm:col-span-3">
+                                            <Label htmlFor="img_kk" value="Foto KK" />
+                                            <input type="file" {...register("img_kk")} className="pt-1 w-full focus:outline-none" />
+                                            {errors.img_kk && errors.img_kk.message && (
+                                                <small className="text-red-500">{errors.img_kk.message}</small>
+                                            )}
+                                        </div>
+                                        <div className="col-span-6 sm:col-span-6">
+                                            <div className="flex items-center">
+                                                <input
+                                                    id="agreement"
+                                                    type="checkbox"
+                                                    {...register('agreement')}
+                                                    className="h-4 w-4 text-blue focus:ring-blue border-gray-300 rounded cursor-pointer"
+                                                />
+                                                <label htmlFor="agreement" className="ml-3 block text-sm text-gray-900 select-none cursor-pointer">
+                                                    Saya menyatakan bahwa data yang diisikan adalah benar dan siap mempertanggungjawabkan apabila ditemukan ketidaksesuaian dalam data tersebut.
+                                                </label>
+                                            </div>
+                                            {errors.agreement && (
+                                                <small className="text-red-500">{errors.agreement.message}</small>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
-                                <div className="px-4 py-3 bg-gray-50 text-right sm:px-6">
-                                    <button type="submit" className="inline-flex justify-center items-center font-lato text-sm bg-blue text-white py-2 px-4 rounded-lg hover:ring-2 dark:hover:ring-offset-gray-700 hover:ring-offset-2 hover:ring-yellow ease-in-out duration-150">
-                                        Verifikasi
+                                <div className="px-4 py-3 bg-gray-50 text-left sm:px-6">
+                                    <button type="submit" className="inline-flex justify-center items-center font-lato text-sm bg-blue text-white py-2 px-4 rounded-lg hover:ring-2 dark:hover:ring-offset-gray-700 hover:ring-offset-2 hover:ring-yellow disabled:opacity-50 ease-in-out duration-150" disabled={loading}>
+                                        {loading ? "Loading ..." : "Verifikasi"}
                                     </button>
                                 </div>
                             </div>
